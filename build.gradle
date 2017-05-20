@@ -1,20 +1,74 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.kotlin_version = '1.1.2-4'
     repositories {
         jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.3.2'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
+        classpath 'com.novoda:bintray-release:0.5.0'
     }
 }
 
 allprojects {
+
+    allprojects {
+        ext {
+            autoPublish = true
+            bintrayRepo = 'kt'
+            bintrayName = 'RxCommons'
+
+            publishedGroupId = 'com.tlz.rxcommons'
+            libraryName = 'RxCommons'
+            artifact = 'RxCommons'
+
+            libraryDescription = 'a rx common lib'
+
+            siteUrl = 'https://github.com/Tomlezen/RxCommons'
+            gitUrl = 'https://github.com/Tomlezen/RxCommons.git'
+            version = '0.0.2'
+
+            developerId = 'mrzk'
+            developerName = 'Tomlezen'
+            developerEmail = 't.nianshang@foxmail.com'
+
+            licenseName = 'The Apache Software License, Version 2.0'
+            licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+            allLicenses = ["Apache-2.0"]
+
+            //kotlin
+            kotlinVersion = '1.1.2-4'
+            kotlinGradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+            kotlinStdLib = "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+            kotlinAndroidExtensions = "org.jetbrains.kotlin:kotlin-android-extensions:$kotlinVersion"
+
+            //android
+            supportVersion = '25.3.1'
+            androidSupportV4 = "com.android.support:support-v4:$supportVersion"
+            androidAppCompatV7 = "com.android.support:appcompat-v7:$supportVersion"
+            androidSupportRecyclerView = "com.android.support:recyclerview-v7:$supportVersion"
+            androidSupportCardView = "com.android.support:cardview-v7:$supportVersion"
+            androidSupportGridLayout = "com.android.support:gridlayout-v7:$supportVersion"
+            androidSupportDesign = "com.android.support:design:$supportVersion"
+
+            //diff
+            diffUtils = 'com.googlecode.java-diff-utils:diffutils:1.3.0'
+
+            //rxjava
+            rxjava_version = '2.0.4'
+            rxandroid_version = '2.0.1'
+            rxjava = "io.reactivex.rxjava2:rxjava:${rxjava_version}"
+            rxandroid = "io.reactivex.rxjava2:rxandroid:${rxandroid_version}"
+
+            //test
+            robolectric = 'org.robolectric:robolectric:3.0'
+            junit = 'junit:junit:4.12'
+
+            //bintray
+            bintray = 'com.novoda:bintray-release:0.5.0'
+        }
+    }
+
     repositories {
         jcenter()
     }
