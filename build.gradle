@@ -54,6 +54,8 @@ allprojects {
             //diff
             diffUtils = 'com.googlecode.java-diff-utils:diffutils:1.3.0'
 
+            //rxkotlin
+            rxkotlin = 'io.reactivex:rxkotlin:2.0.3'
             //rxjava
             rxjava_version = '2.0.4'
             rxandroid_version = '2.0.1'
@@ -65,7 +67,7 @@ allprojects {
             junit = 'junit:junit:4.12'
 
             //bintray
-            bintray = 'com.novoda:bintray-release:0.5.0'
+//            bintray = 'com.novoda:bintray-release:0.5.0'
         }
     }
 

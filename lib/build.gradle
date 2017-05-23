@@ -35,19 +35,17 @@ android {
         unitTests.returnDefaultValues = true
     }
 
-    sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
-        test.java.srcDirs += 'src/test/kotlin'
-    }
+//    sourceSets {
+//        main.java.srcDirs += 'src/main/kotlin'
+//        test.java.srcDirs += 'src/test/kotlin'
+//    }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
+
     compile parent.ext.kotlinStdLib
-    compile parent.ext.rxjava
+    compile parent.ext.rxkotlin
     compile parent.ext.rxandroid
 
     compile parent.ext.diffUtils

@@ -29,6 +29,7 @@ dependencies {
     compile parent.ext.diffUtils
     testCompile parent.ext.junit
     testCompile parent.ext.robolectric
+    //    compile project(':lib')
     compile project(':lib')
 }
 
