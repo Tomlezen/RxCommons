@@ -30,22 +30,31 @@ object RxBus: RxBusI{
     }
 
     override fun <T> register(tag: Any): Observable<T> {
-        var subjectList: ArrayList<PublishSubject<Any>>? = subjectMapper[tag]
+        var subjectList = subjectMapper[tag]
         if (null == subjectList) {
             subjectList = ArrayList<PublishSubject<Any>>()
             subjectMapper.put(tag, subjectList)
         }
         val subject = PublishSubject.create<T>()
-        subjectList.add(subject)
+        subjectList.add(subject as PublishSubject<Any>)
         return subject
     }
 
     override fun unregister(tag: Any) {
-
+        val subjects = subjectMapper[tag]
+        if (null != subjects) {
+            subjectMapper.remove(tag)
+        }
     }
 
-    override fun unregister(tag: Any, observable: Observable<Any>) {
-
+    override fun unregister(tag: Any, observable: Observable<*>) {
+        val subjectList = subjectMapper[tag]
+        if (null != subjectList) {
+            subjectList.remove(observable)
+            if (isEmpty(subjectList)) {
+                subjectMapper.remove(tag)
+            }
+        }
     }
 
     override fun post(content: Any) {

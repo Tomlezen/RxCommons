@@ -3,6 +3,7 @@
 buildscript {
     repositories {
         jcenter()
+        maven { url 'https://maven.fabric.io/public' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.3.2'
@@ -43,7 +44,8 @@ allprojects {
             kotlinAndroidExtensions = "org.jetbrains.kotlin:kotlin-android-extensions:$kotlinVersion"
 
             //android
-            supportVersion = '25.3.1'
+            supportVersion = '26.0.0-alpha1'
+            androidSupportAnnotations  = "com.android.support:support-annotations:$supportVersion"
             androidSupportV4 = "com.android.support:support-v4:$supportVersion"
             androidAppCompatV7 = "com.android.support:appcompat-v7:$supportVersion"
             androidSupportRecyclerView = "com.android.support:recyclerview-v7:$supportVersion"
@@ -61,6 +63,8 @@ allprojects {
             rxandroid_version = '2.0.1'
             rxjava = "io.reactivex.rxjava2:rxjava:${rxjava_version}"
             rxandroid = "io.reactivex.rxjava2:rxandroid:${rxandroid_version}"
+            //okhttp
+            okhttp = "com.squareup.okhttp3:okhttp:3.8.0";
 
             //test
             robolectric = 'org.robolectric:robolectric:3.0'
@@ -73,6 +77,7 @@ allprojects {
 
     repositories {
         jcenter()
+        maven { url "https://jitpack.io" }
     }
 }
 

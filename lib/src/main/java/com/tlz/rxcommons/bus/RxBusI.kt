@@ -22,7 +22,7 @@ internal interface RxBusI {
 
     fun unregister(tag: Any)
 
-    fun unregister(tag: Any, observable: Observable<Any>)
+    fun unregister(tag: Any, observable: Observable<*>)
 
     fun post(content: Any)
 
