@@ -75,16 +75,16 @@ class RxLifecycle {
         }
     }
 
-    class CheckUIDestroiedTransformerForRxBus<T>(private val lifecycle: RxLifecycle, private val TAG: Any, private val all: Boolean) : ObservableTransformer<T, T> {
+    class CheckUIDestroiedTransformerForRxBus<T>(private val lifecycle: RxLifecycle, private val tag: Any, private val all: Boolean) : ObservableTransformer<T, T> {
 
         override fun apply(upstream: Observable<T>): ObservableSource<T> {
             return upstream.takeUntil(lifecycle.lifecycleBehavior.skipWhile { event ->
                 val ok = event != RxLifecycle.Event.DESTROY_VIEW && event != RxLifecycle.Event.DESTROY && event != RxLifecycle.Event.DETACH
                 if (!ok) {
                     if (all)
-                        RxBus.unregister(TAG)
+                        RxBus.unregister(tag)
                     else
-                        RxBus.unregister(TAG, upstream)
+                        RxBus.unregister(tag, upstream)
                 }
                 ok
             }).observeOn(AndroidSchedulers.mainThread())

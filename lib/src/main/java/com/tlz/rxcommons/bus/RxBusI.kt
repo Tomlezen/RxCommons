@@ -1,6 +1,7 @@
 package com.tlz.rxcommons.bus
 
 import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
 import io.reactivex.functions.Consumer
 
 /**
@@ -10,13 +11,13 @@ import io.reactivex.functions.Consumer
  */
 internal interface RxBusI {
 
-    fun <T> onEvent(observable: Observable<T>, onNext: Consumer<T>)
+    fun <T> onEvent(observable: Observable<T>, onNext: Consumer<T>): Disposable
 
-    fun <T> onEvent(observable: Observable<T>, onNext: Consumer<T>, onError: Consumer<Throwable>)
+    fun <T> onEvent(observable: Observable<T>, onNext: Consumer<T>, onError: Consumer<Throwable>): Disposable
 
-    fun <T> onEvent(tag: Any, onNext: Consumer<T>)
+    fun <T> onEvent(tag: Any, onNext: Consumer<T>): Disposable
 
-    fun <T> onEvent(tag: Any, onNext: Consumer<T>, onError: Consumer<Throwable>)
+    fun <T> onEvent(tag: Any, onNext: Consumer<T>, onError: Consumer<Throwable>): Disposable
 
     fun <T> register(tag: Any): Observable<T>
 

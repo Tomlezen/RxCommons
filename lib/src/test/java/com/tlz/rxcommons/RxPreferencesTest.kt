@@ -72,9 +72,4 @@ class RxPreferencesTest {
 
     }
 
-    @Test
-    fun getSharedPreferences() {
-
-    }
-
 }
