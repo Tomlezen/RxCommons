@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'com.novoda.bintray-release'
+//apply plugin: 'com.novoda.bintray-release'
 
 android {
     compileSdkVersion 25
@@ -78,15 +78,15 @@ buildscript {
     }
 }
 
-publish {
-    artifactId = parent.ext.artifact
-    autoPublish = parent.ext.autoPublish
-//    desc = parent.ext.desc
-    publishedGroupId = parent.ext.publishedGroupId
-//    licences = parent.ext.allLicenses
-    publishVersion = parent.ext.version
-//    uploadName = parent.ext.bintrayName
-    website = parent.ext.siteUrl
-//    userOrg  = parent.ext.userOrg
-    repoName = parent.ext.bintrayRepo
-}
+//publish {
+//    artifactId = parent.ext.artifact
+//    autoPublish = parent.ext.autoPublish
+////    desc = parent.ext.desc
+//    publishedGroupId = parent.ext.publishedGroupId
+////    licences = parent.ext.allLicenses
+//    publishVersion = parent.ext.version
+////    uploadName = parent.ext.bintrayName
+//    website = parent.ext.siteUrl
+////    userOrg  = parent.ext.userOrg
+//    repoName = parent.ext.bintrayRepo
+//}
