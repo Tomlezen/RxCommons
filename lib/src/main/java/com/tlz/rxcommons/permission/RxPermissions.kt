@@ -27,11 +27,11 @@ class RxPermissions private constructor(val context: Context) {
 
         private var mInstance: RxPermissions? = null
 
-        fun getInstance(context: Context): RxPermissions?{
+        fun getInstance(context: Context): RxPermissions{
             if(mInstance == null){
                 mInstance = RxPermissions(context)
             }
-            return mInstance
+            return mInstance!!
         }
     }
 
