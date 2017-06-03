@@ -35,7 +35,7 @@ class RxPermissions private constructor(val context: Context) {
         }
     }
 
-    private fun request(vararg permissions: String): Observable<Boolean> {
+    fun request(vararg permissions: String): Observable<Boolean> {
         return Observable.just(Any()).compose { upstream -> request_(upstream, *permissions) }
     }
 
@@ -56,7 +56,7 @@ class RxPermissions private constructor(val context: Context) {
                 })
     }
 
-    private fun requestEach(vararg permissions: String): Observable<Permission> {
+    fun requestEach(vararg permissions: String): Observable<Permission> {
         return Observable.just(true).compose { upstream -> doRequest(upstream, *permissions) }
     }
 
