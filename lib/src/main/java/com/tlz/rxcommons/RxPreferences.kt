@@ -30,6 +30,29 @@ class RxPreferences(val sharedPreferences: SharedPreferences) {
         }, BackpressureStrategy.LATEST).share()
     }
 
+    fun <T> get(key: String, defValue: T): T = with(sharedPreferences){
+        val res: Any = when (defValue) {
+            is Int -> getInt(key, defValue)
+            is Float -> getFloat(key, defValue)
+            is Long -> getLong(key, defValue)
+            is String -> getString(key, defValue)
+            is Boolean -> getBoolean(key, defValue)
+            else -> throw  IllegalArgumentException("This type cant be saved")
+        }
+        res as T
+    }
+
+    fun <T> put(key: String, value: T) = with(sharedPreferences.edit()) {
+        when (value) {
+            is Int -> putInt(key, value)
+            is Float -> putFloat(key, value)
+            is Long -> putLong(key, value)
+            is String -> putString(key, value)
+            is Boolean -> putBoolean(key, value)
+            else -> throw  IllegalArgumentException("This type cant be saved")
+        }.apply()
+    }
+
     private fun observe(key: String, emitOnStart: Boolean): Flowable<String> {
         return preferenceFlowable
                 .startWith(Flowable.just(key, key)
