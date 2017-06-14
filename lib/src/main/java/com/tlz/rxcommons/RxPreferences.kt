@@ -49,7 +49,7 @@ class RxPreferences(val sharedPreferences: SharedPreferences) {
             is Long -> putLong(key, value)
             is String -> putString(key, value)
             is Boolean -> putBoolean(key, value)
-            else -> throw  IllegalArgumentException("This type cant be saved")
+            else -> throw  IllegalArgumentException("This type can be saved")
         }.apply()
     }
 
