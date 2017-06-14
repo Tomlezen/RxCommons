@@ -52,7 +52,7 @@ object RxBus: RxBusI{
         val subjectList = subjectMapper[tag]
         if (null != subjectList) {
             subjectList.remove(observable)
-            if (isEmpty(subjectList)) {
+            if (subjectList.isEmpty()) {
                 subjectMapper.remove(tag)
             }
         }
@@ -64,15 +64,10 @@ object RxBus: RxBusI{
 
     override fun post(tag: Any, content: Any) {
         val subjectsList = subjectMapper[tag]
-        if (!isEmpty(subjectsList)) {
-            for (subject in subjectsList!!) {
-                subject.onNext(content)
-            }
+        if (subjectsList?.isNotEmpty() ?: false) {
+            subjectsList?.filter { it.hasObservers() }
+                    ?.forEach { it.onNext(content) }
         }
-    }
-
-    private fun isEmpty(collection: Collection<PublishSubject<*>>?): Boolean {
-        return null == collection || collection.isEmpty()
     }
 
     private val subjectMapper = ConcurrentHashMap<Any, ArrayList<PublishSubject<Any>>>()
