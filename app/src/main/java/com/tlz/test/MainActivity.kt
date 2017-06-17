@@ -2,6 +2,7 @@ package com.tlz.test
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import com.tlz.rxcommons.http.ProgressCallback
 import com.tlz.rxcommons.test.R
 
 class MainActivity : AppCompatActivity() {

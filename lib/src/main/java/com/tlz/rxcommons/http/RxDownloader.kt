@@ -65,7 +65,7 @@ class RxDownloader(val httpClient: OkHttpClient) {
                             if (!dir.exists()) {
                                 dir.mkdirs()
                             }
-                            val fileName = "{$savaFileName}temp"
+                            val fileName = "$savaFileName.temp"
                             val file = File(dir, fileName)
                             os = FileOutputStream(file)
                             length = ins.read(buffer)
@@ -84,9 +84,9 @@ class RxDownloader(val httpClient: OkHttpClient) {
                             os.flush()
 
                             if (progress == fileSize) {
-                                if (file.renameTo(File(saveFileDir, fileName))) {
+                                if (file.renameTo(File(saveFileDir, savaFileName))) {
                                     if (!emitter.isCancelled) {
-                                        emitter.onNext(File(saveFileDir, fileName))
+                                        emitter.onNext(File(saveFileDir, savaFileName))
                                         emitter.onComplete()
                                     }
                                 } else if (!emitter.isCancelled) {

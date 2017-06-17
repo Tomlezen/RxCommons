@@ -68,10 +68,14 @@ class RxUploader constructor(val httpClient: OkHttpClient) {
                     @Throws(IOException::class)
                     override fun onResponse(call: Call, response: Response) {
                         try {
-                            val content = response.body()!!.string()
                             if (!subscriber.isCancelled) {
-                                subscriber.onNext(content)
-                                subscriber.onComplete()
+                                if(response.isSuccessful){
+                                    val content = response.body()!!.string()
+                                    subscriber.onNext(content)
+                                    subscriber.onComplete()
+                                }else{
+                                    subscriber.onError(Exception("code = ${response.code()}"))
+                                }
                             }
                         } catch (e: Exception) {
                             if (!subscriber.isCancelled) {
