@@ -34,12 +34,16 @@ class RxDownloader(val httpClient: OkHttpClient) {
                     .build()
             val call = httpClient.newCall(request)
             call.enqueue(object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
+                override fun onFailure(c: Call, e: IOException) {
                     emitter.onError(e)
                 }
 
                 @Throws(IOException::class)
-                override fun onResponse(call: Call, response: Response) {
+                override fun onResponse(c: Call, response: Response) {
+                    if(response.body() == null){
+                        emitter.onError(NullPointerException("response body is null"))
+                        return
+                    }
                     var ins: InputStream? = null
                     val buffer = ByteArray(2048)//设置缓冲区大小
                     var length: Int //已读大小
@@ -52,6 +56,7 @@ class RxDownloader(val httpClient: OkHttpClient) {
                         }
                     })
                     try {
+                        response.body()?.source()
                         ins = response.body()?.byteStream()
                         if (emitter.isCancelled) {
                             call.cancel()
@@ -67,7 +72,7 @@ class RxDownloader(val httpClient: OkHttpClient) {
                             }
                             val fileName = "$savaFileName.temp"
                             val file = File(dir, fileName)
-                            os = FileOutputStream(file)
+                            os = file.outputStream()
                             length = ins.read(buffer)
                             while (length != -1 && !call.isCanceled) {
                                 os.write(buffer, 0, length)
@@ -84,9 +89,10 @@ class RxDownloader(val httpClient: OkHttpClient) {
                             os.flush()
 
                             if (progress == fileSize) {
-                                if (file.renameTo(File(saveFileDir, savaFileName))) {
+                                val saveFile = File(saveFileDir, savaFileName)
+                                if (file.renameTo(saveFile)) {
                                     if (!emitter.isCancelled) {
-                                        emitter.onNext(File(saveFileDir, savaFileName))
+                                        emitter.onNext(saveFile)
                                         emitter.onComplete()
                                     }
                                 } else if (!emitter.isCancelled) {

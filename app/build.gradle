@@ -31,6 +31,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile parent.ext.androidAppCompatV7
+    compile parent.ext.okhttp
     compile parent.ext.diffUtils
     testCompile parent.ext.junit
     testCompile parent.ext.robolectric

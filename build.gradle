@@ -64,7 +64,7 @@ allprojects {
             rxjava = "io.reactivex.rxjava2:rxjava:${rxjava_version}"
             rxandroid = "io.reactivex.rxjava2:rxandroid:${rxandroid_version}"
             //okhttp
-            okhttp = "com.squareup.okhttp3:okhttp:3.8.0";
+            okhttp = "com.squareup.okhttp3:okhttp:3.8.0"
 
             //test
             robolectric = 'org.robolectric:robolectric:3.0'
