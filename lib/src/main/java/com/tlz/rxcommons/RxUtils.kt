@@ -57,8 +57,27 @@ object RxUtils {
         return Flowable.interval(0, 1, unit)
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .map { increaseTime -> countTime - increaseTime!!.toInt() }
+                .map { increaseTime -> countTime - increaseTime.toInt() }
                 .take((countTime + 1).toLong())
     }
 
+}
+
+fun delay(millisDelayTime: Long, block: ()->Unit){
+    delay(millisDelayTime, TimeUnit.MILLISECONDS, block)
+}
+
+fun delay(delayTime: Long, timeUnit: TimeUnit, block: ()->Unit){
+    Flowable.timer(delayTime, timeUnit)
+            .subscribe { block() }
+}
+
+fun delayOnMainThread(millisDelayTime: Long, block: ()->Unit){
+    delayOnMainThread(millisDelayTime, TimeUnit.MILLISECONDS, block)
+}
+
+fun delayOnMainThread(delayTime: Long, timeUnit: TimeUnit, block: ()->Unit){
+    Flowable.timer(delayTime, timeUnit)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { block() }
 }

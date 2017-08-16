@@ -11,13 +11,13 @@ import io.reactivex.functions.Consumer
  */
 internal interface RxBusI {
 
-    fun <T> onEvent(observable: Observable<T>, onNext: Consumer<T>): Disposable
+    fun <T> onEvent(observable: Observable<T>, onNext: (T) -> Unit): Disposable
 
-    fun <T> onEvent(observable: Observable<T>, onNext: Consumer<T>, onError: Consumer<Throwable>): Disposable
+    fun <T> onEvent(observable: Observable<T>, onNext: (T) -> Unit, onError: (Throwable) -> Unit): Disposable
 
-    fun <T> onEvent(tag: Any, onNext: Consumer<T>): Disposable
+    fun <T> onEvent(tag: Any, onNext: (T) -> Unit): Disposable
 
-    fun <T> onEvent(tag: Any, onNext: Consumer<T>, onError: Consumer<Throwable>): Disposable
+    fun <T> onEvent(tag: Any, onNext: (T) -> Unit, onError: (Throwable) -> Unit): Disposable
 
     fun <T> register(tag: Any): Observable<T>
 

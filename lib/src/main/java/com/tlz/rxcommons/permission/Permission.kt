@@ -6,4 +6,4 @@ package com.tlz.rxcommons.permission
  * Time 10:54.
  * Email t.nainshang@foxmail.com.
  */
-data class Permission constructor(var name: String, var granted: Boolean)
+data class Permission(var name: String, var granted: Boolean)

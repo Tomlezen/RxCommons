@@ -3,7 +3,6 @@ package com.tlz.rxcommons.bus
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
-import io.reactivex.functions.Consumer
 import io.reactivex.subjects.PublishSubject
 import java.util.concurrent.ConcurrentHashMap
 
@@ -14,19 +13,19 @@ import java.util.concurrent.ConcurrentHashMap
  */
 object RxBus: RxBusI{
 
-    override fun <T> onEvent(observable: Observable<T>, onNext: Consumer<T>, onError: Consumer<Throwable>): Disposable {
+    override fun <T> onEvent(observable: Observable<T>, onNext: (T) -> Unit, onError: (Throwable) -> Unit): Disposable {
         return observable.observeOn(AndroidSchedulers.mainThread()).subscribe(onNext, onError)
     }
 
-    override fun <T> onEvent(observable: Observable<T>, onNext: Consumer<T>): Disposable {
-        return onEvent(observable, onNext, Consumer { it.printStackTrace() })
+    override fun <T> onEvent(observable: Observable<T>, onNext: (T) -> Unit): Disposable {
+        return onEvent(observable, onNext, { it.printStackTrace() } )
     }
 
-    override fun <T> onEvent(tag: Any, onNext: Consumer<T>): Disposable {
+    override fun <T> onEvent(tag: Any, onNext: (T) -> Unit): Disposable {
         return onEvent(register(tag), onNext)
     }
 
-    override fun <T> onEvent(tag: Any, onNext: Consumer<T>, onError: Consumer<Throwable>): Disposable {
+    override fun <T> onEvent(tag: Any, onNext: (T) -> Unit, onError: (Throwable) -> Unit): Disposable {
         return onEvent(register(tag), onNext, onError)
     }
 

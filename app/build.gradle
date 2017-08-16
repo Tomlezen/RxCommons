@@ -33,14 +33,15 @@ dependencies {
     compile parent.ext.androidAppCompatV7
     compile parent.ext.okhttp
     compile parent.ext.diffUtils
+//    compile 'com.github.Tomlezen:RxCommons:0.0.1-1'
     testCompile parent.ext.junit
     testCompile parent.ext.robolectric
-    //    compile project(':lib')
     compile project(':lib')
 }
 
 buildscript {
     repositories {
+        maven { url 'https://jitpack.io' }
         mavenCentral()
     }
 

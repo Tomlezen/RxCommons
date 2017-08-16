@@ -78,7 +78,7 @@ class RxDownloader(val httpClient: OkHttpClient) {
                                 os.write(buffer, 0, length)
                                 progress += length.toLong()
                                 if (!emitter.isCancelled) {
-                                    progressCallback?.sendPogress((progress * 1.0f / fileSize * 100).toInt())
+                                    progressCallback?.sendProgress((progress * 1.0f / fileSize * 100).toInt())
                                 } else {
                                     call.cancel()
                                     emitter.onComplete()

@@ -30,7 +30,7 @@ internal fun String.guessMimeType(): String {
     return contentTypeFor
 }
 
-internal fun ProgressCallback.sendPogress(progress: Int){
+internal fun ProgressCallback.sendProgress(progress: Int){
     Observable.just(progress)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { onProgress(progress) }

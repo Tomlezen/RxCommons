@@ -63,7 +63,7 @@ internal class ProgressRequestBody(val requestBody: RequestBody, val progressCal
                 }
                 //增加当前写入的字节数
                 bytesWritten += byteCount
-                progressCallback?.sendPogress((bytesWritten * 1.0f / contentLength * 100).toInt())
+                progressCallback?.sendProgress((bytesWritten * 1.0f / contentLength * 100).toInt())
             }
         }
     }
