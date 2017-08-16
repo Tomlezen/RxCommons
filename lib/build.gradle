@@ -47,6 +47,7 @@ dependencies {
     compile parent.ext.androidSupportAnnotations
     compile parent.ext.androidAppCompatV7
     compile parent.ext.kotlinJre
+    compile parent.ext.kotlinx_coroutines_android
     compile parent.ext.rxkotlin
     compile parent.ext.rxandroid
     compile parent.ext.okhttp

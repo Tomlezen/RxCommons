@@ -7,6 +7,11 @@ import io.reactivex.SingleTransformer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.CoroutineScope
+import kotlinx.coroutines.experimental.CoroutineStart
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 import java.util.concurrent.TimeUnit
 
 /**
@@ -24,23 +29,7 @@ object RxUtils {
             return false
     }
 
-    fun runOnUi(): Flowable<Boolean> {
-        return runOnUi(true)
-    }
-
-    fun <T> runOnUi(value: T): Flowable<T> {
-        return Flowable.just(value!!).observeOn(AndroidSchedulers.mainThread())
-    }
-
-    fun runOnThread(): Flowable<Boolean> {
-        return runOnThread(true)
-    }
-
-    fun <T> runOnThread(value: T): Flowable<T> {
-        return Flowable.just(value).subscribeOn(Schedulers.newThread())
-    }
-
-    fun <T> applyMainThread(): ObservableTransformer<T, T> {
+    fun <T> applyMainThreadForObservable(): ObservableTransformer<T, T> {
         return ObservableTransformer { upstream -> upstream.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()) }
     }
 
@@ -81,3 +70,7 @@ fun delayOnMainThread(delayTime: Long, timeUnit: TimeUnit, block: ()->Unit){
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { block() }
 }
+
+fun <T> async(start: CoroutineStart = CoroutineStart.DEFAULT, block:  suspend CoroutineScope.() -> T) = kotlinx.coroutines.experimental.async(CommonPool, start, block)
+
+fun ui(start: CoroutineStart = CoroutineStart.DEFAULT, block: suspend CoroutineScope.() -> Unit) = launch(UI, start, block)
