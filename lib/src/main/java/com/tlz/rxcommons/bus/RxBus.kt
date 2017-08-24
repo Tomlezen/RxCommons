@@ -5,6 +5,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeUnit.MILLISECONDS
 
 /**
  * Created by tomlezen.
@@ -62,11 +64,37 @@ object RxBus: RxBusI{
     }
 
     override fun post(tag: Any, content: Any) {
-        val subjectsList = subjectMapper[tag]
-        if (subjectsList?.isNotEmpty() ?: false) {
-            subjectsList?.filter { it.hasObservers() }
+        postDelay(tag, content, 0L)
+    }
+
+    override fun postDelay(content: Any, millis: Long) {
+        post(content.javaClass, content)
+    }
+
+    override fun postDelay(content: Any, delay: Long, unit: TimeUnit) {
+        postDelay(content.javaClass, content, delay, unit)
+    }
+
+    override fun postDelay(tag: Any, content: Any, millis: Long) {
+        postDelay(tag, content, millis, MILLISECONDS)
+    }
+
+    override fun postDelay(tag: Any, content: Any, delay: Long, unit: TimeUnit) {
+        if(delay == 0L){
+            val subjectsList = subjectMapper[tag]
+            if (subjectsList?.isNotEmpty() ?: false) {
+                subjectsList?.filter { it.hasObservers() }
                     ?.forEach { it.onNext(content) }
+            }
+        }else{
+            com.tlz.rxcommons.delay(delay, unit){
+                val subjectsList = subjectMapper[tag]
+                if (subjectsList?.isNotEmpty() ?: false) {
+                    subjectsList?.filter { it.hasObservers() }?.forEach { it.onNext(content) }
+                }
+            }
         }
+
     }
 
     private val subjectMapper = ConcurrentHashMap<Any, ArrayList<PublishSubject<Any>>>()

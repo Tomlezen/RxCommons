@@ -1,6 +1,7 @@
 package com.tlz.rxcommons
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -43,8 +44,7 @@ object RxNetwork {
         return Observable.create<NetworkInfo.State>({ e ->
             val receiver = object : BroadcastReceiver() {
                 override fun onReceive(context: Context, intent: Intent) {
-                    val connectivityManager = context
-                            .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
                     val info = connectivityManager.activeNetworkInfo
                     if (info != null) {
                         e.onNext(info.state)

@@ -3,6 +3,7 @@ package com.tlz.rxcommons.bus
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.Consumer
+import java.util.concurrent.TimeUnit
 
 /**
  * Created by tomlezen.
@@ -27,6 +28,14 @@ internal interface RxBusI {
 
     fun post(content: Any)
 
+    fun postDelay(content: Any, millis: Long)
+
+    fun postDelay(content: Any, delay: Long, unit: TimeUnit)
+
     fun post(tag: Any, content: Any)
+
+    fun postDelay(tag: Any, content: Any, millis: Long)
+
+    fun postDelay(tag: Any, content: Any, delay: Long, unit: TimeUnit)
 
 }
