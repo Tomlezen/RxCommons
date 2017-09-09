@@ -16,22 +16,26 @@ import io.reactivex.android.MainThreadDisposable
  */
 object RxReceiver {
 
-    fun  observeBroadcast(context: Context, filter: IntentFilter): Observable<Intent> {
-        return create({ emitter ->
-            run {
-                val receiver = object: BroadcastReceiver() {
-                    override fun onReceive(context: Context, intent: Intent) {
-                        emitter.onNext(intent)
-                    }
-                }
-                emitter.setDisposable(object :MainThreadDisposable(){
-                    override fun onDispose() {
-                        context.unregisterReceiver(receiver)
-                    }
-                })
-                context.registerReceiver(receiver, filter)
-            }
+  fun observeBroadcast(context: Context, vararg filters: String): Observable<Intent> {
+    return observeBroadcast(context, IntentFilter().apply { filters.forEach { addAction(it) } })
+  }
+
+  fun observeBroadcast(context: Context, filters: IntentFilter): Observable<Intent> {
+    return create({ emitter ->
+      run {
+        val receiver = object : BroadcastReceiver() {
+          override fun onReceive(context: Context, intent: Intent) {
+            emitter.onNext(intent)
+          }
+        }
+        emitter.setDisposable(object : MainThreadDisposable() {
+          override fun onDispose() {
+            context.unregisterReceiver(receiver)
+          }
         })
-    }
+        context.registerReceiver(receiver, filters)
+      }
+    })
+  }
 
 }

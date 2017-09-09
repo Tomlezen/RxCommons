@@ -12,30 +12,31 @@ import java.util.concurrent.TimeUnit
  */
 internal interface RxBusI {
 
-    fun <T> onEvent(observable: Observable<T>, onNext: (T) -> Unit): Disposable
+  fun <T> onEvent(observable: Observable<T>, onNext: (T) -> Unit): Disposable
 
-    fun <T> onEvent(observable: Observable<T>, onNext: (T) -> Unit, onError: (Throwable) -> Unit): Disposable
+  fun <T> onEvent(observable: Observable<T>, onNext: (T) -> Unit,
+      onError: (Throwable) -> Unit): Disposable
 
-    fun <T> onEvent(tag: Any, onNext: (T) -> Unit): Disposable
+  fun <T> onEvent(tag: Any, onNext: (T) -> Unit): Disposable
 
-    fun <T> onEvent(tag: Any, onNext: (T) -> Unit, onError: (Throwable) -> Unit): Disposable
+  fun <T> onEvent(tag: Any, onNext: (T) -> Unit, onError: (Throwable) -> Unit): Disposable
 
-    fun <T> register(tag: Any): Observable<T>
+  fun <T> register(tag: Any): Observable<T>
 
-    fun unregister(tag: Any)
+  fun unregister(tag: Any)
 
-    fun unregister(tag: Any, observable: Observable<*>)
+  fun unregister(tag: Any, observable: Observable<*>)
 
-    fun post(content: Any)
+  fun post(content: Any)
 
-    fun postDelay(content: Any, millis: Long)
+  fun postDelay(content: Any, millis: Long)
 
-    fun postDelay(content: Any, delay: Long, unit: TimeUnit)
+  fun postDelay(content: Any, delay: Long, unit: TimeUnit)
 
-    fun post(tag: Any, content: Any)
+  fun post(tag: Any, content: Any)
 
-    fun postDelay(tag: Any, content: Any, millis: Long)
+  fun postDelay(tag: Any, content: Any, millis: Long)
 
-    fun postDelay(tag: Any, content: Any, delay: Long, unit: TimeUnit)
+  fun postDelay(tag: Any, content: Any, delay: Long, unit: TimeUnit)
 
 }

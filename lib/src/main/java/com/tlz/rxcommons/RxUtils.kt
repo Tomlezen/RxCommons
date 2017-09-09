@@ -20,15 +20,6 @@ import java.util.concurrent.TimeUnit
  * Time: 上午10:31
  */
 object RxUtils {
-
-    fun disposeIfNotNull(disposable: Disposable?): Boolean {
-        if (disposable != null && !disposable.isDisposed) {
-            disposable.dispose()
-            return true
-        } else
-            return false
-    }
-
     fun <T> applyMainThreadForObservable(): ObservableTransformer<T, T> {
         return ObservableTransformer { upstream -> upstream.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()) }
     }
