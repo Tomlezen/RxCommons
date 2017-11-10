@@ -70,7 +70,7 @@ object RxBus : RxBusI {
   }
 
   override fun postDelay(content: Any, millis: Long): Disposable? {
-    return postDelay(content.javaClass, millis, MILLISECONDS)
+    return postDelay(content, millis, MILLISECONDS)
   }
 
   override fun postDelay(content: Any, delay: Long, unit: TimeUnit): Disposable? {

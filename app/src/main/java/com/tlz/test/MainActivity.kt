@@ -45,6 +45,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "我接受到消息啦$it", Toast.LENGTH_LONG).show()
         }
         rxPermissons = RxPermissions.with(this)
+        RxBus.postDelay("cesh1", 2000)
     }
 
     private fun requestPermission(){
