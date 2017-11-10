@@ -69,33 +69,33 @@ object RxBus : RxBusI {
     postDelay(tag, content, 0L)
   }
 
-  override fun postDelay(content: Any, millis: Long) {
-    post(content.javaClass, content)
+  override fun postDelay(content: Any, millis: Long): Disposable? {
+    return postDelay(content.javaClass, millis)
   }
 
-  override fun postDelay(content: Any, delay: Long, unit: TimeUnit) {
-    postDelay(content.javaClass, content, delay, unit)
+  override fun postDelay(content: Any, delay: Long, unit: TimeUnit): Disposable? {
+    return postDelay(content.javaClass, content, delay, unit)
   }
 
-  override fun postDelay(tag: Any, content: Any, millis: Long) {
-    postDelay(tag, content, millis, MILLISECONDS)
+  override fun postDelay(tag: Any, content: Any, millis: Long): Disposable? {
+    return postDelay(tag, content, millis, MILLISECONDS)
   }
 
-  override fun postDelay(tag: Any, content: Any, delay: Long, unit: TimeUnit) {
+  override fun postDelay(tag: Any, content: Any, delay: Long, unit: TimeUnit): Disposable? {
     if (delay == 0L) {
       val subjectsList = subjectMapper[tag]
       if (subjectsList?.isNotEmpty() == true) {
         subjectsList.filter { it.hasObservers() }.forEach { it.onNext(content) }
       }
     } else {
-      com.tlz.rxcommons.delay(delay, unit) {
+      return com.tlz.rxcommons.delay(delay, unit) {
         val subjectsList = subjectMapper[tag]
         if (subjectsList?.isNotEmpty() == true) {
           subjectsList.filter { it.hasObservers() }.forEach { it.onNext(content) }
         }
       }
     }
-
+    return null
   }
 
   private val subjectMapper = ConcurrentHashMap<Any, ArrayList<PublishSubject<Any>>>()

@@ -29,14 +29,14 @@ internal interface RxBusI {
 
   fun post(content: Any)
 
-  fun postDelay(content: Any, millis: Long)
+  fun postDelay(content: Any, millis: Long): Disposable?
 
-  fun postDelay(content: Any, delay: Long, unit: TimeUnit)
+  fun postDelay(content: Any, delay: Long, unit: TimeUnit): Disposable?
 
   fun post(tag: Any, content: Any)
 
-  fun postDelay(tag: Any, content: Any, millis: Long)
+  fun postDelay(tag: Any, content: Any, millis: Long): Disposable?
 
-  fun postDelay(tag: Any, content: Any, delay: Long, unit: TimeUnit)
+  fun postDelay(tag: Any, content: Any, delay: Long, unit: TimeUnit): Disposable?
 
 }

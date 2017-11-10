@@ -20,48 +20,57 @@ import java.util.concurrent.TimeUnit
  * Time: 上午10:31
  */
 object RxUtils {
-    fun <T> applyMainThreadForObservable(): ObservableTransformer<T, T> {
-        return ObservableTransformer { upstream -> upstream.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()) }
+  fun <T> applyMainThreadForObservable(): ObservableTransformer<T, T> {
+    return ObservableTransformer { upstream ->
+      upstream.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
     }
+  }
 
-    fun <T> applyMainThreadForFlowable(): FlowableTransformer<T, T> {
-        return FlowableTransformer { upstream -> upstream.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()) }
+  fun <T> applyMainThreadForFlowable(): FlowableTransformer<T, T> {
+    return FlowableTransformer { upstream ->
+      upstream.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
     }
+  }
 
-    fun <T> applyMainThreadForSingle(): SingleTransformer<T, T> {
-        return SingleTransformer { upstream -> upstream.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()) }
+  fun <T> applyMainThreadForSingle(): SingleTransformer<T, T> {
+    return SingleTransformer { upstream ->
+      upstream.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
     }
+  }
 
-    fun countdown(time: Int, unit: TimeUnit): Flowable<Int> {
-        val countTime = if (time < 0) 0 else time
-        return Flowable.interval(0, 1, unit)
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .map { increaseTime -> countTime - increaseTime.toInt() }
-                .take((countTime + 1).toLong())
-    }
+  fun countdown(time: Int, unit: TimeUnit): Flowable<Int> {
+    val countTime = if (time < 0) 0 else time
+    return Flowable.interval(0, 1, unit)
+        .subscribeOn(AndroidSchedulers.mainThread())
+        .observeOn(AndroidSchedulers.mainThread())
+        .map { increaseTime -> countTime - increaseTime.toInt() }
+        .take((countTime + 1).toLong())
+  }
 
 }
 
-fun delay(millisDelayTime: Long, block: ()->Unit){
-    delay(millisDelayTime, TimeUnit.MILLISECONDS, block)
+fun delay(millisDelayTime: Long, block: () -> Unit): Disposable {
+  return delay(millisDelayTime, TimeUnit.MILLISECONDS, block)
 }
 
-fun delay(delayTime: Long, timeUnit: TimeUnit, block: ()->Unit){
-    Flowable.timer(delayTime, timeUnit)
-            .subscribe { block() }
+fun delay(delayTime: Long, timeUnit: TimeUnit, block: () -> Unit): Disposable {
+  return Flowable.timer(delayTime, timeUnit)
+      .subscribe { block() }
 }
 
-fun delayOnMainThread(millisDelayTime: Long, block: ()->Unit){
-    delayOnMainThread(millisDelayTime, TimeUnit.MILLISECONDS, block)
+fun delayOnMainThread(millisDelayTime: Long, block: () -> Unit): Disposable {
+  return delayOnMainThread(millisDelayTime, TimeUnit.MILLISECONDS, block)
 }
 
-fun delayOnMainThread(delayTime: Long, timeUnit: TimeUnit, block: ()->Unit){
-    Flowable.timer(delayTime, timeUnit)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { block() }
+fun delayOnMainThread(delayTime: Long, timeUnit: TimeUnit, block: () -> Unit): Disposable {
+  return Flowable.timer(delayTime, timeUnit)
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe { block() }
 }
 
-fun <T> async(start: CoroutineStart = CoroutineStart.DEFAULT, block:  suspend CoroutineScope.() -> T) = kotlinx.coroutines.experimental.async(CommonPool, start, block)
+fun <T> async(start: CoroutineStart = CoroutineStart.DEFAULT,
+    block: suspend CoroutineScope.() -> T) = kotlinx.coroutines.experimental.async(CommonPool,
+    start, block)
 
-fun ui(start: CoroutineStart = CoroutineStart.DEFAULT, block: suspend CoroutineScope.() -> Unit) = launch(UI, start, block)
+fun ui(start: CoroutineStart = CoroutineStart.DEFAULT,
+    block: suspend CoroutineScope.() -> Unit) = launch(UI, start, block)
