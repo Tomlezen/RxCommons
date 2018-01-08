@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
  * Date: 2017/5/22.
  * Time: 下午10:17
  */
-internal interface RxBusI {
+internal interface IRxBus {
 
   fun <T> onEvent(observable: Observable<T>, onNext: (T) -> Unit): Disposable
 

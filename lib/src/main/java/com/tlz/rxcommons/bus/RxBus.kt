@@ -13,25 +13,20 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
  * Date: 2017/5/20.
  * Time: 下午4:13
  */
-object RxBus : RxBusI {
+object RxBus : IRxBus {
 
   override fun <T> onEvent(observable: Observable<T>, onNext: (T) -> Unit,
-      onError: (Throwable) -> Unit): Disposable {
-    return observable.observeOn(AndroidSchedulers.mainThread()).subscribe(onNext, onError)
-  }
+      onError: (Throwable) -> Unit): Disposable =
+      observable.observeOn(AndroidSchedulers.mainThread()).subscribe(onNext, onError)
 
-  override fun <T> onEvent(observable: Observable<T>, onNext: (T) -> Unit): Disposable {
-    return onEvent(observable, onNext, { it.printStackTrace() })
-  }
+  override fun <T> onEvent(observable: Observable<T>, onNext: (T) -> Unit): Disposable =
+      onEvent(observable, onNext, { it.printStackTrace() })
 
-  override fun <T> onEvent(tag: Any, onNext: (T) -> Unit): Disposable {
-    return onEvent(register(tag), onNext)
-  }
+  override fun <T> onEvent(tag: Any, onNext: (T) -> Unit): Disposable =
+      onEvent(register(tag), onNext)
 
   override fun <T> onEvent(tag: Any, onNext: (T) -> Unit,
-      onError: (Throwable) -> Unit): Disposable {
-    return onEvent(register(tag), onNext, onError)
-  }
+      onError: (Throwable) -> Unit): Disposable = onEvent(register(tag), onNext, onError)
 
   override fun <T> register(tag: Any): Observable<T> {
     var subjectList = subjectMapper[tag]
@@ -69,17 +64,14 @@ object RxBus : RxBusI {
     postDelay(tag, content, 0L)
   }
 
-  override fun postDelay(content: Any, millis: Long): Disposable? {
-    return postDelay(content, millis, MILLISECONDS)
-  }
+  override fun postDelay(content: Any, millis: Long): Disposable? =
+      postDelay(content, millis, MILLISECONDS)
 
-  override fun postDelay(content: Any, delay: Long, unit: TimeUnit): Disposable? {
-    return postDelay(content.javaClass, content, delay, unit)
-  }
+  override fun postDelay(content: Any, delay: Long, unit: TimeUnit): Disposable? =
+      postDelay(content.javaClass, content, delay, unit)
 
-  override fun postDelay(tag: Any, content: Any, millis: Long): Disposable? {
-    return postDelay(tag, content, millis, MILLISECONDS)
-  }
+  override fun postDelay(tag: Any, content: Any, millis: Long): Disposable? =
+      postDelay(tag, content, millis, MILLISECONDS)
 
   override fun postDelay(tag: Any, content: Any, delay: Long, unit: TimeUnit): Disposable? {
     if (delay == 0L) {

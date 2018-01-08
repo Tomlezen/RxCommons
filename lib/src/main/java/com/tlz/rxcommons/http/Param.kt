@@ -6,4 +6,4 @@ package com.tlz.rxcommons.http
  * Time 15:40.
  * Email t.nainshang@foxmail.com.
  */
-data class Param constructor(val key: String, val value: String?)
+data class Param constructor(val key: String, val value: String)

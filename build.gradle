@@ -4,10 +4,11 @@ buildscript {
     repositories {
         google()
         jcenter()
-        maven { url 'https://maven.fabric.io/public' }
+        mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0'
+        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
 //        classpath 'com.novoda:bintray-release:0.5.0'
     }
 }
@@ -39,14 +40,14 @@ allprojects {
             allLicenses = ["Apache-2.0"]
 
             //kotlin
-            kotlinVersion = '1.1.2-4'
+            kotlinVersion = '1.2.10'
             kotlinGradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
             kotlinJre = "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"
             kotlinAndroidExtensions = "org.jetbrains.kotlin:kotlin-android-extensions:$kotlinVersion"
             kotlinx_coroutines_android = "org.jetbrains.kotlinx:kotlinx-coroutines-android:0.17"
 
             //android
-            supportVersion = '26.0.0-alpha1'
+            supportVersion = '26.1.0'
             androidSupportAnnotations  = "com.android.support:support-annotations:$supportVersion"
             androidSupportV4 = "com.android.support:support-v4:$supportVersion"
             androidAppCompatV7 = "com.android.support:appcompat-v7:$supportVersion"
@@ -61,7 +62,7 @@ allprojects {
             //rxkotlin
             rxkotlin = 'io.reactivex.rxjava2:rxkotlin:2.0.3'
             //rxjava
-            rxjava_version = '2.1.0'
+            rxjava_version = '2.1.8'
             rxandroid_version = '2.0.1'
             rxjava = "io.reactivex.rxjava2:rxjava:${rxjava_version}"
             rxandroid = "io.reactivex.rxjava2:rxandroid:${rxandroid_version}"
@@ -78,6 +79,7 @@ allprojects {
     }
 
     repositories {
+        google()
         jcenter()
         maven { url "https://jitpack.io" }
     }

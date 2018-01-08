@@ -49,18 +49,16 @@ object RxUtils {
 
 }
 
-fun delay(millisDelayTime: Long, block: () -> Unit): Disposable {
-  return delay(millisDelayTime, TimeUnit.MILLISECONDS, block)
-}
+fun delay(millisDelayTime: Long, block: () -> Unit): Disposable =
+    delay(millisDelayTime, TimeUnit.MILLISECONDS, block)
 
 fun delay(delayTime: Long, timeUnit: TimeUnit, block: () -> Unit): Disposable {
   return Flowable.timer(delayTime, timeUnit)
       .subscribe { block() }
 }
 
-fun delayOnMainThread(millisDelayTime: Long, block: () -> Unit): Disposable {
-  return delayOnMainThread(millisDelayTime, TimeUnit.MILLISECONDS, block)
-}
+fun delayOnMainThread(millisDelayTime: Long, block: () -> Unit): Disposable =
+    delayOnMainThread(millisDelayTime, TimeUnit.MILLISECONDS, block)
 
 fun delayOnMainThread(delayTime: Long, timeUnit: TimeUnit, block: () -> Unit): Disposable {
   return Flowable.timer(delayTime, timeUnit)
@@ -68,9 +66,7 @@ fun delayOnMainThread(delayTime: Long, timeUnit: TimeUnit, block: () -> Unit): D
       .subscribe { block() }
 }
 
-fun <T> async(start: CoroutineStart = CoroutineStart.DEFAULT,
-    block: suspend CoroutineScope.() -> T) = kotlinx.coroutines.experimental.async(CommonPool,
-    start, block)
+fun <T> async(start: CoroutineStart = CoroutineStart.DEFAULT, block: suspend CoroutineScope.() -> T) = kotlinx.coroutines.experimental.async(CommonPool, start, block)
 
-fun ui(start: CoroutineStart = CoroutineStart.DEFAULT,
-    block: suspend CoroutineScope.() -> Unit) = launch(UI, start, block)
+fun ui(start: CoroutineStart = CoroutineStart.DEFAULT, block: suspend CoroutineScope.() -> Unit) = launch(UI, start, block)
+

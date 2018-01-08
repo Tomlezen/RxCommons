@@ -19,6 +19,7 @@ import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import com.tlz.rxcommons.ui
 import io.reactivex.android.schedulers.AndroidSchedulers
 import java.lang.Exception
 
@@ -37,9 +38,9 @@ class MainActivity : AppCompatActivity() {
 //        val okhttpClient = OkHttpClient.Builder().build()
 //        RxDownloader(okhttpClient).download("http://thermometer.fanmicloud.com/download/sf/a/20170703-1-4.txt", dir, fileName)
 //            .subscribe({
-//                Log.e("MainActivity", "download algorithm update file successful")
+//                Log.e("MainActivity", "download file successful")
 //            }, {
-//                Log.e("MainActivity", "download algorithm file failed")
+//                Log.e("MainActivity", "download file failed")
 //            })
         RxBus.onEvent<String>(MainActivity::class) {
             Toast.makeText(this, "我接受到消息啦$it", Toast.LENGTH_LONG).show()

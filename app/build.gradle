@@ -2,12 +2,12 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 26
     buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "com.tlz.rxcommons.test"
         minSdkVersion 15
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -35,7 +35,6 @@ dependencies {
     compile parent.ext.diffUtils
 //    compile 'com.github.Tomlezen:RxCommons:0.0.1-1'
     testCompile parent.ext.junit
-    testCompile parent.ext.robolectric
     compile project(':lib')
 }
 

@@ -42,84 +42,81 @@ class RxDownloader(val httpClient: OkHttpClient) {
 
         @Throws(IOException::class)
         override fun onResponse(c: Call, response: Response) {
-          if (response.body() == null) {
-            emitter.onError(NullPointerException("response body is null"))
-            return
-          }
-          var ins: InputStream? = null
-          val buffer = ByteArray(2048)//设置缓冲区大小
-          var length: Int //已读大小
-          var os: FileOutputStream? = null
-          var progress: Long = 0 //进度
-          val fileSize = response.body()!!.contentLength()
-          emitter.setDisposable(object : MainThreadDisposable() {
-            override fun onDispose() {
-              call.cancel()
-            }
-          })
-          try {
-            response.body()?.source()
-            ins = response.body()?.byteStream()
-            if (emitter.isCancelled) {
-              call.cancel()
-              emitter.onComplete()
-            } else if (ins == null) {
-              call.cancel()
-              emitter.onError(NullPointerException("InputStream is null!"))
-            } else {
-              progressCallback?.sendFileSize(fileSize)
-              val dir = File(saveFileDir)
-              if (!dir.exists()) {
-                dir.mkdirs()
+          response.body()?.let {
+            emitter.setDisposable(object : MainThreadDisposable() {
+              override fun onDispose() {
+                call.cancel()
               }
-              val fileName = "$saveFileName.temp"
-              val file = File(dir, fileName)
-              os = file.outputStream()
-              length = ins.read(buffer)
-              while (length != -1 && !call.isCanceled) {
-                os.write(buffer, 0, length)
-                progress += length.toLong()
-                if (!emitter.isCancelled) {
-                  progressCallback?.sendProgress((progress * 1.0f / fileSize * 100).toInt())
-                } else {
-                  call.cancel()
-                  emitter.onComplete()
-                  break
+            })
+            var ins: InputStream? = null
+            val buffer = ByteArray(2048)
+            var length: Int //已读大小
+            var os: FileOutputStream? = null
+            var progress: Long = 0 //进度
+            val totalSize = it.contentLength()
+            try {
+              it.source()
+              ins = it.byteStream()
+              if (emitter.isCancelled) {
+                call.cancel()
+                emitter.onComplete()
+              } else if (ins == null) {
+                call.cancel()
+                emitter.onError(NullPointerException("InputStream is null!"))
+              } else {
+                progressCallback?.sendFileSize(totalSize)
+                val dir = File(saveFileDir)
+                if (!dir.exists()) {
+                  dir.mkdirs()
                 }
+                val fileName = "$saveFileName.temp"
+                val file = File(dir, fileName)
+                os = file.outputStream()
                 length = ins.read(buffer)
-              }
-              os.flush()
-
-              if (progress == fileSize) {
-                val saveFile = File(saveFileDir, saveFileName)
-                if (file.renameTo(saveFile)) {
+                while (length != -1 && !call.isCanceled) {
+                  os.write(buffer, 0, length)
+                  progress += length.toLong()
                   if (!emitter.isCancelled) {
-                    emitter.onNext(saveFile)
+                    progressCallback?.sendProgress((progress * 1.0f / totalSize * 100).toInt())
+                  } else {
+                    call.cancel()
                     emitter.onComplete()
+                    break
+                  }
+                  length = ins.read(buffer)
+                }
+                os.flush()
+
+                if (progress == totalSize) {
+                  val saveFile = File(saveFileDir, saveFileName)
+                  if (file.renameTo(saveFile)) {
+                    if (!emitter.isCancelled) {
+                      emitter.onNext(saveFile)
+                      emitter.onComplete()
+                    }
+                  } else if (!emitter.isCancelled) {
+                    emitter.onError(FileNotFoundException())
                   }
                 } else if (!emitter.isCancelled) {
                   emitter.onError(FileNotFoundException())
                 }
-              } else if (!emitter.isCancelled) {
-                emitter.onError(FileNotFoundException())
+              }
+            } catch (e: Exception) {
+              emitter.onError(e)
+            } finally {
+              try {
+                ins?.close()
+              } catch (e: IOException) {
+                e.printStackTrace()
+              }
+
+              try {
+                os?.close()
+              } catch (e: IOException) {
+                e.printStackTrace()
               }
             }
-          } catch (e: Exception) {
-            emitter.onError(e)
-          } finally {
-            try {
-              ins?.close()
-            } catch (e: IOException) {
-              e.printStackTrace()
-            }
-
-            try {
-              os?.close()
-            } catch (e: IOException) {
-              e.printStackTrace()
-            }
-
-          }
+          } ?: emitter.onError(NullPointerException("response body is null"))
         }
       })
     }, BackpressureStrategy.LATEST)

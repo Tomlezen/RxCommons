@@ -12,7 +12,7 @@ import java.io.IOException
  * Email t.nainshang@foxmail.com.
  */
 internal class ProgressRequestBody(private val requestBody: RequestBody,
-    val progressCallback: ProgressCallback?) : RequestBody() {
+    val progressCallback: ProgressCallback) : RequestBody() {
 
   private var bufferedSink: BufferedSink? = null
 
@@ -52,10 +52,10 @@ internal class ProgressRequestBody(private val requestBody: RequestBody,
         super.write(source, byteCount)
         if (contentLength == 0L) {
           contentLength = contentLength()
-          progressCallback?.sendFileSize(contentLength)
+          progressCallback.sendFileSize(contentLength)
         }
         bytesWritten += byteCount
-        progressCallback?.sendProgress((bytesWritten * 1.0f / contentLength * 100).toInt())
+        progressCallback.sendProgress((bytesWritten * 1.0f / contentLength * 100).toInt())
       }
     }
   }
