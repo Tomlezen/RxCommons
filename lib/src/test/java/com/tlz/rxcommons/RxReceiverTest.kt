@@ -38,7 +38,7 @@ class RxReceiverTest{
         filter.addAction("test2")
         filter.addAction("test3")
         var action: String? = null
-        RxReceiver.observeBroadcast(RuntimeEnvironment.application, filter)
+        RxReceiverExts.observeBroadcast(RuntimeEnvironment.application, filter)
                 .subscribe { action = it.action }
         RuntimeEnvironment.application.sendBroadcast(Intent("test1"))
         Assert.assertEquals(action ,"test1")

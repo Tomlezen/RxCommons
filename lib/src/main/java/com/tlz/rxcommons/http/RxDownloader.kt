@@ -2,9 +2,12 @@ package com.tlz.rxcommons.http
 
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
+import io.reactivex.FlowableEmitter
 import io.reactivex.android.MainThreadDisposable
 import okhttp3.*
-import java.io.*
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.IOException
 
 /**
  * Created by LeiShao.
@@ -12,82 +15,72 @@ import java.io.*
  * Time 15:37.
  * Email t.nainshang@foxmail.com.
  */
-class RxDownloader(val httpClient: OkHttpClient) {
+class RxDownloader private constructor(private val httpClient: OkHttpClient) {
 
-  fun download(downloadUrl: String, saveFileDir: String): Flowable<File> {
-    return download(downloadUrl, saveFileDir, downloadUrl.getFileName(), null)
-  }
+  fun download(downloadUrl: String, saveFileDir: String): Flowable<File> =
+      download(downloadUrl, saveFileDir, downloadUrl.getFileName(), null)
 
-  fun download(downloadUrl: String, saveFileDir: String, saveFileName: String): Flowable<File> {
-    return download(downloadUrl, saveFileDir, saveFileName, null)
-  }
+  fun download(downloadUrl: String, saveFileDir: String, saveFileName: String): Flowable<File> =
+      download(downloadUrl, saveFileDir, saveFileName, null)
 
-  fun download(downloadUrl: String, saveFileDir: String,
-      progressCallback: ProgressCallback): Flowable<File> {
-    return download(downloadUrl, saveFileDir, downloadUrl.getFileName(), progressCallback)
-  }
+  fun download(downloadUrl: String, saveFileDir: String, progressCallback: ProgressCallback): Flowable<File> =
+      download(downloadUrl, saveFileDir, downloadUrl.getFileName(), progressCallback)
 
-  fun download(downloadUrl: String, saveFileDir: String, saveFileName: String?,
-      progressCallback: ProgressCallback?): Flowable<File> {
-    return Flowable.create({ emitter ->
-      val request = Request.Builder()
-          .url(downloadUrl)
-          .tag(downloadUrl)
-          .build()
-      val call = httpClient.newCall(request)
-      call.enqueue(object : Callback {
-        override fun onFailure(c: Call, e: IOException) {
-          emitter.onError(e)
-        }
+  fun download(downloadUrl: String, saveFileDir: String, saveFileName: String?, progressCallback: ProgressCallback?): Flowable<File> =
+      Flowable.create({
+        val request = Request.Builder()
+            .url(downloadUrl)
+            .tag(downloadUrl)
+            .addHeader("Accept-Encoding", "identity")
+            .build()
+        val call = httpClient.newCall(request)
+        call.enqueue(ResponseCallback(it, saveFileDir, saveFileName, progressCallback))
+        it.setDisposable(object : MainThreadDisposable() {
+          override fun onDispose() {
+            call?.cancel()
+          }
+        })
+      }, BackpressureStrategy.LATEST)
 
-        @Throws(IOException::class)
-        override fun onResponse(c: Call, response: Response) {
-          response.body()?.let {
-            emitter.setDisposable(object : MainThreadDisposable() {
-              override fun onDispose() {
-                call.cancel()
+  private inner class ResponseCallback(
+      private val emitter: FlowableEmitter<File>,
+      private val saveFileDir: String,
+      private val saveFileName: String?,
+      private val progressCallback: ProgressCallback?
+  ) : Callback {
+    override fun onFailure(call: Call?, e: IOException?) {
+      e?.let { emitter.onError(it) }
+    }
+
+    override fun onResponse(call: Call?, response: Response?) {
+      response?.body()?.let { body ->
+        try {
+          if (emitter.isCancelled) {
+            call?.cancel()
+          } else {
+            val totalSize = body.contentLength()
+            body.source()
+            body.byteStream()?.use {
+              progressCallback?.sendFileSize(totalSize)
+              val saveDir = File(saveFileDir).apply {
+                if (!exists()) {
+                  mkdirs()
+                }
               }
-            })
-            var ins: InputStream? = null
-            val buffer = ByteArray(2048)
-            var length: Int //已读大小
-            var os: FileOutputStream? = null
-            var progress: Long = 0 //进度
-            val totalSize = it.contentLength()
-            try {
-              it.source()
-              ins = it.byteStream()
-              if (emitter.isCancelled) {
-                call.cancel()
-                emitter.onComplete()
-              } else if (ins == null) {
-                call.cancel()
-                emitter.onError(NullPointerException("InputStream is null!"))
-              } else {
-                progressCallback?.sendFileSize(totalSize)
-                val dir = File(saveFileDir)
-                if (!dir.exists()) {
-                  dir.mkdirs()
+              val fileName = "$saveFileName.temp"
+              val file = File(saveDir, fileName)
+              file.outputStream().use { out ->
+                var bytesCopied: Long = 0
+                val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                var bytes = it.read(buffer)
+                while (bytes >= 0 && !emitter.isCancelled) {
+                  out.write(buffer, 0, bytes)
+                  bytesCopied += bytes
+                  progressCallback?.sendProgress((bytesCopied * 1.0f / totalSize * 100).toInt())
+                  bytes = it.read(buffer)
                 }
-                val fileName = "$saveFileName.temp"
-                val file = File(dir, fileName)
-                os = file.outputStream()
-                length = ins.read(buffer)
-                while (length != -1 && !call.isCanceled) {
-                  os.write(buffer, 0, length)
-                  progress += length.toLong()
-                  if (!emitter.isCancelled) {
-                    progressCallback?.sendProgress((progress * 1.0f / totalSize * 100).toInt())
-                  } else {
-                    call.cancel()
-                    emitter.onComplete()
-                    break
-                  }
-                  length = ins.read(buffer)
-                }
-                os.flush()
 
-                if (progress == totalSize) {
+                if (bytesCopied == totalSize) {
                   val saveFile = File(saveFileDir, saveFileName)
                   if (file.renameTo(saveFile)) {
                     if (!emitter.isCancelled) {
@@ -101,24 +94,17 @@ class RxDownloader(val httpClient: OkHttpClient) {
                   emitter.onError(FileNotFoundException())
                 }
               }
-            } catch (e: Exception) {
-              emitter.onError(e)
-            } finally {
-              try {
-                ins?.close()
-              } catch (e: IOException) {
-                e.printStackTrace()
-              }
-
-              try {
-                os?.close()
-              } catch (e: IOException) {
-                e.printStackTrace()
-              }
-            }
-          } ?: emitter.onError(NullPointerException("response body is null"))
+            } ?: emitter.onError(NullPointerException("InputStream is null!"))
+          }
+        } catch (e: Exception) {
+          emitter.onError(e)
         }
-      })
-    }, BackpressureStrategy.LATEST)
+      } ?: emitter.onError(NullPointerException("response body is null"))
+    }
   }
+
+  companion object {
+    fun newInstance(okHttpClient: OkHttpClient) = RxDownloader(okHttpClient)
+  }
+
 }

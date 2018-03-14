@@ -11,9 +11,8 @@ interface ProgressCallback {
   fun onFileSize(size: Long)
 }
 
-fun <T> T.ProgressCallback(totalSize: (size: Long) -> Unit,
-    progress: (progress: Int) -> Unit): ProgressCallback {
-  return object : ProgressCallback {
+fun <T> T.ProgressCallback(totalSize: (size: Long) -> Unit, progress: (progress: Int) -> Unit) =
+   object : ProgressCallback {
     override fun onFileSize(size: Long) {
       totalSize(size)
     }
@@ -22,4 +21,3 @@ fun <T> T.ProgressCallback(totalSize: (size: Long) -> Unit,
       progress(progress)
     }
   }
-}

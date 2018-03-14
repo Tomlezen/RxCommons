@@ -2,7 +2,7 @@ package com.tlz.rxcommons.http
 
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
-import io.reactivex.android.MainThreadDisposable
+import io.reactivex.FlowableEmitter
 import okhttp3.*
 import java.io.File
 import java.io.IOException
@@ -13,22 +13,19 @@ import java.io.IOException
  * Time 15:37.
  * Email t.nainshang@foxmail.com.
  */
-class RxUploader constructor(private val httpClient: OkHttpClient) {
+class RxUploader private constructor(private val httpClient: OkHttpClient) {
 
-  fun upload(serviceUrl: String, fileKey: String, fileValue: String): Flowable<String> =
+  fun upload(serviceUrl: String, fileKey: String, fileValue: String) =
       upload(serviceUrl, arrayOf(Param(fileKey, fileValue)), null, null)
 
-  fun upload(serviceUrl: String, fileKey: String, fileValue: String,
-      params: Array<Param>?): Flowable<String> =
+  fun upload(serviceUrl: String, fileKey: String, fileValue: String, params: Array<Param>) =
       upload(serviceUrl, arrayOf(Param(fileKey, fileValue)), params, null)
 
-  fun upload(serviceUrl: String, fileKey: String, fileValue: String, params: Array<Param>,
-      progressCallback: ProgressCallback): Flowable<String> =
+  fun upload(serviceUrl: String, fileKey: String, fileValue: String, params: Array<Param>, progressCallback: ProgressCallback) =
       upload(serviceUrl, arrayOf(Param(fileKey, fileValue)), params, progressCallback)
 
-  fun upload(serviceUrl: String, files: Array<Param>, params: Array<Param>?,
-      progressCallback: ProgressCallback?): Flowable<String> {
-    return Flowable.create<String>({ subscriber ->
+  fun upload(serviceUrl: String, files: Array<Param>, params: Array<Param>?, progressCallback: ProgressCallback?) =
+     Flowable.create<String>({
       val builder = MultipartBody.Builder().setType(MultipartBody.FORM)
       val headersBuilder = Headers.Builder()
       params?.forEach {
@@ -38,7 +35,8 @@ class RxUploader constructor(private val httpClient: OkHttpClient) {
       if(headers.size() > 0){
         builder.addPart(headers, RequestBody.create(null, ""))
       }
-      files.filter { File(it.value).exists() }.forEach {
+      files.filter { File(it.value).exists() }
+          .forEach {
         val file = File(it.value)
         val fileName = file.name
         builder.addFormDataPart(it.key, fileName, RequestBody.create(MediaType.parse(fileName.guessMimeType()), file))
@@ -51,47 +49,36 @@ class RxUploader constructor(private val httpClient: OkHttpClient) {
             .tag(serviceUrl)
             .build()
         val call = httpClient.newCall(request)
-        call.enqueue(object : Callback {
-          override fun onFailure(call: Call, e: IOException) {
-            if (!subscriber.isCancelled) {
-              subscriber.onError(e)
-            }
-          }
-
-          @Throws(IOException::class)
-          override fun onResponse(call: Call, response: Response) {
-            try {
-              if (!subscriber.isCancelled) {
-                if (response.isSuccessful) {
-                  val content = response.body()!!.string()
-                  subscriber.onNext(content)
-                  subscriber.onComplete()
-                } else {
-                  subscriber.onError(Exception("code = ${response.code()}"))
-                }
-              }
-            } catch (e: Exception) {
-              if (!subscriber.isCancelled) {
-                subscriber.onError(e)
-              }
-            }
-
-          }
-        })
-        subscriber.setDisposable(object : MainThreadDisposable() {
-          override fun onDispose() {
-            if (!call.isCanceled) {
-              call.cancel()
-            }
-          }
-        })
-      } catch (e: Exception) {
-        e.printStackTrace()
-        if (!subscriber.isCancelled) {
-          subscriber.onError(e)
-        }
+        call.enqueue(ResponseCallback(it))
+      }catch (e: Exception){
+        it.onError(e)
       }
     }, BackpressureStrategy.BUFFER)
+
+  private inner class ResponseCallback(private val emitter: FlowableEmitter<String>): Callback{
+    override fun onFailure(call: Call?, e: IOException?) {
+      e?.apply { emitter.onError(this) }
+    }
+
+    override fun onResponse(call: Call?, response: Response?) {
+      try {
+        if (!emitter.isCancelled) {
+          if (response?.isSuccessful == true) {
+            val content = response.body()?.string() ?: throw NullPointerException("response body is null")
+            emitter.onNext(content)
+            emitter.onComplete()
+          } else {
+            emitter.onError(Exception("code = ${response?.code() ?: "null"}"))
+          }
+        }
+      } catch (e: Exception) {
+        emitter.onError(e)
+      }
+    }
+  }
+
+  companion object {
+    fun newInstance(okHttpClient: OkHttpClient) = RxUploader(okHttpClient)
   }
 
 }

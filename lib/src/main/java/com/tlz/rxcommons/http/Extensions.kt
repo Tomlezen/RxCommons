@@ -30,14 +30,13 @@ internal fun String.guessMimeType(): String {
   return contentTypeFor
 }
 
-internal fun ProgressCallback.sendProgress(progress: Int) {
+internal fun ProgressCallback.sendProgress(progress: Int) =
   Observable.just(progress)
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe { onProgress(progress) }
-}
 
-internal fun ProgressCallback.sendFileSize(size: Long) {
+
+internal fun ProgressCallback.sendFileSize(size: Long) =
   Observable.just(size)
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe { onFileSize(size) }
-}

@@ -45,15 +45,15 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
-    compile parent.ext.androidSupportAnnotations
-    compile parent.ext.androidAppCompatV7
-    compile parent.ext.kotlinJre
-    compile parent.ext.kotlinx_coroutines_android
-    compile parent.ext.rxkotlin
-    compile parent.ext.rxandroid
-    compile parent.ext.okhttp
+    implementation parent.ext.androidSupportAnnotations
+    implementation parent.ext.androidAppCompatV7
+    implementation parent.ext.kotlinJre
+    implementation parent.ext.kotlinx_coroutines_android
+    implementation parent.ext.rxkotlin
+    implementation parent.ext.rxandroid
+    implementation parent.ext.okhttp
 
-    compile parent.ext.diffUtils
+    implementation parent.ext.diffUtils
 
     testCompile parent.ext.junit
 }

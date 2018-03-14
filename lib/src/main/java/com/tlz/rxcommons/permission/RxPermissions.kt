@@ -7,9 +7,6 @@ import android.os.Build
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.FragmentActivity
 import io.reactivex.Observable
-import io.reactivex.ObservableSource
-import io.reactivex.functions.Function
-import io.reactivex.functions.Predicate
 import io.reactivex.subjects.PublishSubject
 import java.lang.ref.WeakReference
 import java.util.*
@@ -24,70 +21,59 @@ class RxPermissions private constructor(activity: FragmentActivity) {
 
   private val activityRef = WeakReference<FragmentActivity>(activity)
 
-  private val mSubjectMap = HashMap<String, PublishSubject<Permission>>()
+  private val subjectMap = HashMap<String, PublishSubject<Permission>>()
 
   private var permissionFragment: PermissionFragment? = null
 
   fun request(permissions: Array<String>): Observable<Boolean> {
-    return Observable.just(Any()).compose { upstream -> request_(upstream, *permissions) }
+    return Observable.just(Any()).compose { upstream -> request(upstream, *permissions) }
   }
 
-  private fun request_(observable: Observable<Any>,
-      vararg permissions: String): Observable<Boolean> {
+  private fun request(observable: Observable<Any>, vararg permissions: String): Observable<Boolean> {
     return doRequest(observable, *permissions)
-        .buffer(permissions.size) //等待所有数据
-        .flatMap(Function<List<Permission>, ObservableSource<Boolean>> { permissions ->
-          if (permissions.isEmpty()) {
-            return@Function Observable.empty<Boolean>()
+        .buffer(permissions.size)
+        .flatMap {
+          if (it.isEmpty()) {
+            return@flatMap Observable.empty<Boolean>()
           }
-          //只要有一个被取消就返回false
-          for ((_, granted) in permissions) {
-            if (!granted) {
-              return@Function Observable.just(false)
-            }
-          }
-          Observable.just(true)
-        })
+          Observable.just(!it.any { !it.granted })
+        }
   }
 
   fun requestEach(vararg permissions: String): Observable<Permission> {
     return Observable.just(true).compose { upstream -> doRequest(upstream, *permissions) }
   }
 
-  private fun doRequest(observable: Observable<*>,
-      vararg permissions: String): Observable<Permission> {
+  private fun doRequest(observable: Observable<*>, vararg permissions: String): Observable<Permission> {
     if (permissions.isEmpty()) {
       throw IllegalArgumentException("Requires at least one input permission")
     }
-    return observable.flatMap { doRequest_(*permissions) }
+    return observable.flatMap { doRequest(*permissions) }
   }
 
-  private fun doRequest_(vararg permissions: String): Observable<Permission> {
+  private fun doRequest(vararg permissions: String): Observable<Permission> {
 
-    /** 所有的请求权限  */
     val list = ArrayList<Observable<Permission>>(permissions.size)
-    /** 需要请求的权限  */
     val unrequestedPermissions = ArrayList<String>()
 
-    //过滤
     Observable.fromArray(*permissions)
-        .filter(Predicate<String> { s ->
+        .filter{ s ->
           if (isGranted(s)) {
             list.add(Observable.just(Permission(s, true)))
-            return@Predicate false
+            return@filter false
           }
           if (isRevoked(s)) {
             list.add(Observable.just(Permission(s, false)))
-            return@Predicate false
+            return@filter false
           }
           true
-        })
+        }
         .subscribe({ s ->
-          var subject: PublishSubject<Permission>? = mSubjectMap[s]
+          var subject: PublishSubject<Permission>? = subjectMap[s]
           if (subject == null) {
             unrequestedPermissions.add(s)
             subject = PublishSubject.create<Permission>()
-            mSubjectMap.put(s, subject)
+            subjectMap[s] = subject
           }
           list.add(subject!!)
         })
@@ -111,48 +97,40 @@ class RxPermissions private constructor(activity: FragmentActivity) {
   }
 
   private fun addFragment(permissionFragment: PermissionFragment) {
-    activityRef.get()?.supportFragmentManager?.beginTransaction()?.add(permissionFragment,
-        PermissionFragment.TAG)?.commitNowAllowingStateLoss()
+    activityRef.get()?.supportFragmentManager?.beginTransaction()?.add(permissionFragment, PermissionFragment.TAG)?.commitNowAllowingStateLoss()
   }
 
-  internal fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>,
-      grantResults: IntArray) {
-    var i = 0
-    val size = permissions.size
-    while (i < size) {
-      val subject = mSubjectMap[permissions[i]] ?: throw IllegalStateException(
-          "didn't find the corresponding permission request.")
-      //移除权限请求
-      mSubjectMap.remove(permissions[i])
-      val granted = grantResults[i] == PackageManager.PERMISSION_GRANTED
-      //请求发布结果
-      subject.onNext(Permission(permissions[i], granted))
+  internal fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    permissions.forEachIndexed { index, s ->
+      val subject = subjectMap[s] ?: throw IllegalStateException("didn't find the corresponding permission request.")
+      subjectMap.remove(s)
+      val granted = grantResults[index] == PackageManager.PERMISSION_GRANTED
+      subject.onNext(Permission(s, granted))
       subject.onComplete()
-      i++
     }
   }
 
-  fun shouldShowRequestPermissionRationale(activity: Activity,
-      vararg permissions: String): Observable<Boolean> {
+  fun shouldShowRequestPermissionRationale(activity: Activity, vararg permissions: String): Observable<Boolean> {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
       return Observable.just(false)
     }
-    return Observable.just(shouldShowRequestPermissionRationale_(activity, *permissions))
+    return Observable.just(shouldShowRequestPermissionRationaleM(activity, *permissions))
   }
 
   @TargetApi(Build.VERSION_CODES.M)
-  private fun shouldShowRequestPermissionRationale_(activity: Activity,
-      vararg permissions: String): Boolean {
+  private fun shouldShowRequestPermissionRationaleM(activity: Activity, vararg permissions: String): Boolean {
     return permissions.none { !isGranted(it) && !activity.shouldShowRequestPermissionRationale(it) }
   }
 
   fun isGranted(permission: String): Boolean {
-    return isGranted_(permission)
+    return activityRef.get()?.let {
+      return ActivityCompat.checkSelfPermission(it, permission) == PackageManager.PERMISSION_GRANTED
+    } ?: false
   }
 
   fun isRevoked(permission: String): Boolean {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-      return isM() && isRevoked_(permission)
+      return isM() && isRevokedM(permission)
     }
     return false
   }
@@ -161,20 +139,15 @@ class RxPermissions private constructor(activity: FragmentActivity) {
     return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
   }
 
-  private fun isGranted_(permission: String): Boolean {
-    return activityRef.get()?.let {
-      return ActivityCompat.checkSelfPermission(it, permission) == PackageManager.PERMISSION_GRANTED
-    } ?: false
-  }
-
   @TargetApi(Build.VERSION_CODES.M)
-  private fun isRevoked_(permission: String): Boolean {
+  private fun isRevokedM(permission: String): Boolean {
     return activityRef.get()?.let {
       return it.packageManager.isPermissionRevokedByPolicy(permission, it.packageName)
     } ?: false
   }
 
   companion object {
+    @JvmStatic
     fun with(activity: FragmentActivity) = RxPermissions(activity)
   }
 
